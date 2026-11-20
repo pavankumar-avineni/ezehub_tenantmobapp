@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "EzeHub Tenant",
+    "slug": "ezehub-tenant",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ezehub.tenant",
+      "icon": "./assets/icon.png"
+    },
+    "android": {
+      "package": "com.ezehub.tenant",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1a1a1a"
+      }
+    },
+    "scheme": "ezehub-tenant",
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow EzeHub to access your photos for document uploads."
+        }
+      ],
+      "expo-asset",
+      "@react-native-community/datetimepicker",
+      "expo-font"
+    ]
+  }
+}
