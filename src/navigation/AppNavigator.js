@@ -1,7 +1,9 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+﻿import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
+import { logAction } from '../utils/logger';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import ResidentsScreen from '../screens/ResidentsScreen';
@@ -30,9 +32,36 @@ import SettingsScreen from '../screens/SettingsScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function ResidentsStack() {
+function useStackOptions() {
   const { colors } = useTheme();
-  const opts = { headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text, headerTitleStyle: { fontWeight: '600' } };
+  return {
+    headerStyle: { backgroundColor: colors.background },
+    headerTintColor: colors.text,
+    headerTitleStyle: { fontWeight: '600' },
+  };
+}
+
+function DashboardStack() {
+  const opts = useStackOptions();
+  return (
+    <Stack.Navigator screenOptions={opts}>
+      <Stack.Screen name="DashboardHome" component={DashboardScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="DashboardBuildings" component={BuildingsScreen} options={{ title: 'Buildings' }} />
+      <Stack.Screen name="DashboardOccupancy" component={BedMapScreen} options={{ title: 'Occupancy & Bed Map' }} />
+      <Stack.Screen name="DashboardStaff" component={StaffScreen} options={{ title: 'Staff' }} />
+      <Stack.Screen name="DashboardComplaints" component={ComplaintsScreen} options={{ title: 'Complaints' }} />
+      <Stack.Screen name="DashboardResidents" component={ResidentsScreen} options={{ title: 'Residents' }} />
+      <Stack.Screen name="DashboardResidentDetail" component={ResidentDetailScreen} options={{ title: 'Resident Details' }} />
+      <Stack.Screen name="DashboardAddResident" component={AddResidentScreen} options={{ title: 'Add Resident' }} />
+      <Stack.Screen name="DashboardRent" component={RentScreen} options={{ title: 'Pending Rent' }} />
+      <Stack.Screen name="DashboardRentDetail" component={RentDetailScreen} options={{ title: 'Rent Details' }} />
+      <Stack.Screen name="DashboardPaymentProofs" component={PaymentProofsScreen} options={{ title: 'Payment Proofs' }} />
+    </Stack.Navigator>
+  );
+}
+
+function ResidentsStack() {
+  const opts = useStackOptions();
   return (
     <Stack.Navigator screenOptions={opts}>
       <Stack.Screen name="ResidentsList" component={ResidentsScreen} options={{ title: 'Residents' }} />
@@ -43,8 +72,7 @@ function ResidentsStack() {
 }
 
 function RentStack() {
-  const { colors } = useTheme();
-  const opts = { headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text, headerTitleStyle: { fontWeight: '600' } };
+  const opts = useStackOptions();
   return (
     <Stack.Navigator screenOptions={opts}>
       <Stack.Screen name="RentList" component={RentScreen} options={{ title: 'Rent' }} />
@@ -55,8 +83,7 @@ function RentStack() {
 }
 
 function MoreStack() {
-  const { colors } = useTheme();
-  const opts = { headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text, headerTitleStyle: { fontWeight: '600' } };
+  const opts = useStackOptions();
   return (
     <Stack.Navigator screenOptions={opts}>
       <Stack.Screen name="MoreMenu" component={MoreScreen} options={{ title: 'More' }} />
@@ -80,9 +107,16 @@ function MoreStack() {
 
 export function AppNavigator() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = 56 + insets.bottom;
 
   return (
     <Tab.Navigator
+      screenListeners={{
+        tabPress: (e) => {
+          logAction('TAB_NAVIGATION', `Bottom tab pressed: ${e.target}`);
+        },
+      }}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           const icons = {
@@ -97,16 +131,26 @@ export function AppNavigator() {
         headerShown: false,
         tabBarActiveTintColor: colors.tabActive,
         tabBarInactiveTintColor: colors.tabInactive,
-        tabBarStyle: { backgroundColor: colors.tabBar, borderTopColor: colors.divider, paddingBottom: 4, height: 60 },
+        tabBarStyle: {
+          backgroundColor: colors.tabBar,
+          borderTopColor: colors.divider,
+          paddingTop: 6,
+          paddingBottom: Math.max(insets.bottom, 8),
+          height: tabBarHeight,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: '600' },
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Dashboard" component={DashboardStack} options={{ headerShown: false }} />
       <Tab.Screen name="Residents" component={ResidentsStack} options={{ headerShown: false }} />
       <Tab.Screen name="Rent" component={RentStack} options={{ headerShown: false }} />
-      <Tab.Screen name="Visitors" component={VisitorsScreen} />
+      <Tab.Screen name="Visitors" component={VisitorsScreen} options={{ headerShown: false }} />
       <Tab.Screen name="More" component={MoreStack} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
